@@ -42,6 +42,18 @@ SOURCE_URL="https://storage.googleapis.com/alphafold-databases/casp14_versions/b
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"
-aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
-pigz -dc "${ROOT_DIR}/${BASENAME}" | tar xf - -C "${ROOT_DIR}"
+
+if [[ ! -f "${ROOT_DIR}/${BASENAME}" ]]; then
+    aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
+    if [[ $? -ne 0 ]]; then
+        echo "Error: Download interrupted. Removing partial download."
+        rm -f "${ROOT_DIR}/${BASENAME}"
+        exit 1
+    fi
+else
+    echo "File ${BASENAME} already exists. Skipping download."
+fi
+
+tar --use-compress-program=pigz --extract --verbose --file="${ROOT_DIR}/${BASENAME}" \
+  --directory="${ROOT_DIR}"
 rm "${ROOT_DIR}/${BASENAME}"
