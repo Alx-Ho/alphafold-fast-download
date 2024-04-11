@@ -30,6 +30,11 @@ if ! command -v aria2c &> /dev/null ; then
     exit 1
 fi
 
+if ! command -v pigz &> /dev/null ; then
+    echo "Error: pigz could not be found. Please install pigz (sudo apt install pigz)."
+    exit 1
+fi
+
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/uniprot"
 
@@ -45,8 +50,8 @@ mkdir --parents "${ROOT_DIR}"
 aria2c "${TREMBL_SOURCE_URL}" --dir="${ROOT_DIR}"
 aria2c "${SPROT_SOURCE_URL}" --dir="${ROOT_DIR}"
 pushd "${ROOT_DIR}"
-gunzip "${ROOT_DIR}/${TREMBL_BASENAME}"
-gunzip "${ROOT_DIR}/${SPROT_BASENAME}"
+pigz -dc "${ROOT_DIR}/${TREMBL_BASENAME}" > "${ROOT_DIR}/${TREMBL_UNZIPPED_BASENAME}"
+pigz -dc "${ROOT_DIR}/${SPROT_BASENAME}" > "${ROOT_DIR}/${SPROT_UNZIPPED_BASENAME}"
 
 # Concatenate TrEMBL and SwissProt, rename to uniprot and clean up.
 cat "${ROOT_DIR}/${SPROT_UNZIPPED_BASENAME}" >> "${ROOT_DIR}/${TREMBL_UNZIPPED_BASENAME}"
