@@ -29,11 +29,6 @@ if ! command -v aria2c &> /dev/null ; then
     exit 1
 fi
 
-if ! command -v pigz &> /dev/null ; then
-    echo "Error: pigz could not be found. Please install pigz (sudo apt install pigz)."
-    exit 1
-fi
-
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/bfd"
 # Mirror of:
@@ -42,18 +37,7 @@ SOURCE_URL="https://storage.googleapis.com/alphafold-databases/casp14_versions/b
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"
-
-if [[ ! -f "${ROOT_DIR}/${BASENAME}" ]]; then
-    aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
-    if [[ $? -ne 0 ]]; then
-        echo "Error: Download interrupted. Removing partial download."
-        rm -f "${ROOT_DIR}/${BASENAME}"
-        exit 1
-    fi
-else
-    echo "File ${BASENAME} already exists. Skipping download."
-fi
-
-tar --use-compress-program=pigz --extract --verbose --file="${ROOT_DIR}/${BASENAME}" \
+aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
+tar --extract --verbose --file="${ROOT_DIR}/${BASENAME}" \
   --directory="${ROOT_DIR}"
 rm "${ROOT_DIR}/${BASENAME}"

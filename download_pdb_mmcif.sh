@@ -34,11 +34,6 @@ if ! command -v rsync &> /dev/null ; then
     exit 1
 fi
 
-if ! command -v pigz &> /dev/null ; then
-    echo "Error: pigz could not be found. Please install pigz (sudo apt install pigz)."
-    exit 1
-fi
-
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/pdb_mmcif"
 RAW_DIR="${ROOT_DIR}/raw"
@@ -55,7 +50,7 @@ rsync --recursive --links --perms --times --compress --info=progress2 --delete -
   "${RAW_DIR}"
 
 echo "Unzipping all mmCIF files..."
-find "${RAW_DIR}/" -type f -iname "*.gz" -print0 | xargs -0 -P $(nproc) -I {} pigz -d {}
+find "${RAW_DIR}/" -type f -iname "*.gz" -exec gunzip {} +
 
 echo "Flattening all mmCIF files..."
 mkdir --parents "${MMCIF_DIR}"
