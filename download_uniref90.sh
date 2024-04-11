@@ -29,6 +29,11 @@ if ! command -v aria2c &> /dev/null ; then
     exit 1
 fi
 
+if ! command -v pigz &> /dev/null ; then
+    echo "Error: pigz could not be found. Please install pigz (sudo apt install pigz)."
+    exit 1
+fi
+
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/uniref90"
 SOURCE_URL="https://ftp.ebi.ac.uk/pub/databases/uniprot/uniref/uniref90/uniref90.fasta.gz"
@@ -37,5 +42,5 @@ BASENAME=$(basename "${SOURCE_URL}")
 mkdir --parents "${ROOT_DIR}"
 aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
 pushd "${ROOT_DIR}"
-gunzip "${ROOT_DIR}/${BASENAME}"
+pigz -dc "${ROOT_DIR}/${BASENAME}" > "${ROOT_DIR}/${BASENAME%.gz}"
 popd
